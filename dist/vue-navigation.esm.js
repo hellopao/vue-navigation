@@ -36,6 +36,8 @@ function matches(pattern, name) {
   return false;
 }
 
+var titles = [];
+
 var Navigator = (function (bus, store, moduleName, keyName) {
   if (store) {
     store.registerModule(moduleName, {
@@ -85,9 +87,10 @@ var Navigator = (function (bus, store, moduleName, keyName) {
     store ? store.commit('navigation/FORWARD', { to: to, from: from, name: name }) : routes.push(name);
     window.sessionStorage.VUE_NAVIGATION = JSON.stringify(routes);
     bus.$emit('forward', to, from);
+    titles.push(document.title);
   };
   var back = function back(count, toRoute, fromRoute) {
-    var to = { route: toRoute };
+    var to = { route: toRoute, title: titles.pop() };
     var from = { route: fromRoute };
     var routes = store ? store.state[moduleName].routes : Routes;
     from.name = routes[routes.length - 1];

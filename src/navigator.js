@@ -1,6 +1,8 @@
 import Routes from './routes'
 import {getKey} from './utils'
 
+const titles = [];
+
 export default (bus, store, moduleName, keyName) => {
   if (store) {
     store.registerModule(moduleName, {
@@ -36,9 +38,10 @@ export default (bus, store, moduleName, keyName) => {
     store ? store.commit('navigation/FORWARD', {to, from, name}) : routes.push(name)
     window.sessionStorage.VUE_NAVIGATION = JSON.stringify(routes)
     bus.$emit('forward', to, from)
+    titles.push(document.title);
   }
   const back = (count, toRoute, fromRoute) => {
-    const to = {route: toRoute}
+    const to = {route: toRoute, title: titles.pop()}
     const from = {route: fromRoute}
     const routes = store ? store.state[moduleName].routes : Routes
     from.name = routes[routes.length - 1]
