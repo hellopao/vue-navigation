@@ -1,10 +1,10 @@
 import Routes from './routes'
 import Navigator from './navigator'
-import NavComponent from './components/navigation'
-import {genKey} from './utils'
+import NavComponent from './components/Navigation'
+import { genKey, isObjEqual } from './utils'
 
 export default {
-  install: (Vue, {router, store, moduleName = 'navigation', keyName = 'VNK'} = {}) => {
+  install: (Vue, { router, store, moduleName = 'navigation', keyName = 'VNK' } = {}) => {
     if (!router) {
       console.error('vue-navigation need options: router')
       return
@@ -24,9 +24,17 @@ export default {
     // init router`s keyName
     router.beforeEach((to, from, next) => {
       if (!to.query[keyName]) {
-        const query = {...to.query}
-        query[keyName] = genKey()
-        next({path: to.path, query, replace: replaceFlag || !from.query[keyName]})
+        const query = { ...to.query }
+        // go to the same route will be set the same key
+        if (to.path === from.path && isObjEqual(
+          { ...to.query, [keyName]: null },
+          { ...from.query, [keyName]: null },
+        ) && from.query[keyName]) {
+          query[keyName] = from.query[keyName]
+        } else {
+          query[keyName] = genKey()
+        }
+        next({ path: to.path, query, replace: replaceFlag || !from.query[keyName] })
       } else {
         next()
       }
