@@ -1,5 +1,5 @@
 /**
-* vue-navigation v1.1.1
+* vue-navigation v1.1.3
 * https://github.com/zack24q/vue-navigation
 * Released under the MIT License.
 */
@@ -34,6 +34,46 @@ function matches(pattern, name) {
     return pattern.test(name);
   }
   return false;
+}
+
+function isObjEqual(obj1, obj2) {
+  if (obj1 === obj2) {
+    return true;
+  } else {
+    var keys1 = Object.getOwnPropertyNames(obj1);
+    var keys2 = Object.getOwnPropertyNames(obj2);
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = keys1[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var key = _step.value;
+
+        if (obj1[key] !== obj2[key]) {
+          return false;
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    return true;
+  }
 }
 
 var titles = [];
@@ -204,6 +244,8 @@ var NavComponent = (function (keyName) {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var index = {
   install: function install(Vue) {
     var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
@@ -232,7 +274,12 @@ var index = {
     router.beforeEach(function (to, from, next) {
       if (!to.query[keyName]) {
         var query = _extends({}, to.query);
-        query[keyName] = genKey();
+
+        if (to.path === from.path && isObjEqual(_extends({}, to.query, _defineProperty({}, keyName, null)), _extends({}, from.query, _defineProperty({}, keyName, null))) && from.query[keyName]) {
+          query[keyName] = from.query[keyName];
+        } else {
+          query[keyName] = genKey();
+        }
         next({ path: to.path, query: query, replace: replaceFlag || !from.query[keyName] });
       } else {
         next();
